@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    volumes:
+      - ./bedrock:/var/www/html # This path is correct
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./bedrock:/var/www/html # This path is correct
+    depends_on:
+      - php
+    networks:
+      - app-network
+
+  mysql:
+    build:
+      context: ./docker/mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpressuser
+      MYSQL_PASSWORD: wordpresspassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
